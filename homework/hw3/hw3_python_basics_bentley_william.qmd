@@ -74,20 +74,55 @@ print(leftover_books)
 ### Strings
 
 5.  Create two variables: `hero = "Odysseus"` and `epithet` set to a short phrase describing him (your own words are fine — e.g. "man of many wiles").
+```{python}
+hero = "Odysseus"
+epithet = "bushy locks"
+```
 6.  Concatenate `hero` and `epithet` with `+` (remember the space won't appear on its own). Then print `hero` and `epithet` the other way, with `print(hero, epithet)`. What's different about the two outputs?  *W hero and epithet are separate strings, so printing them together combines their display into a single line.
+```{python}
+print(hero + " " + epithet)
+print(hero, epithet)
+```
 7.  Homer is sometimes translated as calling him "the man of twists and turns." Assign that **exact sentence, including the quotation marks,** to a variable called `homer_quote`. You'll need to either escape the internal quotes with `\"` or use a different quote character to wrap the string — your call, just make it run without a `SyntaxError`.
+```{python}
+homer_quote = "the man of twists and turns"
+print(homer_quote)
+```
 
 ### Booleans
 
 8.  Check whether `war_years` and `journey_years` are equal, using `==`. Store the result in a variable called `years_match` and print it.
-9.  Create a variable `book_number` and assign it any integer from 1 to 24.
+```{python}
+years_match = war_years == journey_years
+print(years_match)
+```
+9.  Create a variable `book_number` and assign it any integer from 1 to 24.4$$4
+```{python}
+book_number = 19
+```
 10. Create two more variables: `is_first_book` (`True` if `book_number` is 1) and `is_last_book` (`True` if `book_number` is 24).
+```{python}
+is_first_book = book_number == 1
+is_last_book = book_number == 24
+print(is_first_book, is_last_book)
+```
 11. Create `is_bookend`, combining the two above with `or` — `True` if your chosen book is either the first or the last. Print `book_number` and `is_bookend` together in one `print()` call.
+```{python}
+is_bookend = is_first_book or is_last_book
+print(book_number, is_bookend)
+```
 
 ### Book Profile
 
 12. Pick a book number from 1–24. Create three variables: `book_number` (an int), `my_guess` (a string — your own one-sentence guess about what might happen in that book; it doesn't need to be accurate), and `is_double_digit` (a boolean — whether `book_number` is 10 or greater).
 13. Print all three variables, then print the `type()` of each one.
+```{python}
+book_number = 19
+my_guess = "The Sirens will insult Odysseus."
+is_double_digit = book_number >= 10
+print(book_number, my_guess, is_double_digit)
+print(type(book_number), type(my_guess), type(is_double_digit))
+```
 
 ------------------------------------------------------------------------
 
@@ -126,10 +161,23 @@ print(words[0:20])
 ``` 
 16. Try a few different slices, further into the list, until you find one that clearly looks like real Homer rather than Project Gutenberg's own text. Record the slice (the indices) you used, and what it printed. *W I used the slice words[1000:1500]. It printed text that looks like the actual poem, and not the introduction or theproject gutenberg material.
 
+```{python}
+print(words[1000:1500])
+```
+
 ### Sets
 
-17. Build `unique_words = set(words)`. Print `len(unique_words)`.
+17. Build `unique_words = set(words)`.
+Print `len(unique_words)`.
+```{python}
+unique_words = set(words)
+print(len(unique_words))
+```
 18. Compute the type-token ratio for the whole file: `len(unique_words) / len(words)`.
+```{python}
+ttr = len(unique_words) / len(words)
+print(ttr)
+```
 19. On Day 14 in class, the two 23-word opening lines we analyzed had type-token ratios around 0.78 and 0.91. Compare those to the ratio you just got for the whole *Odyssey*. Is it higher or lower — and in 2–3 sentences, explain *why* you think that happens as a text gets longer. *W The ttr for the Odyssey is 0.10, which is lower than the opening lines we analyzed earlier. I would say this makes sense because a longer text usually has repeated words, so the total number of tokens grows faster than the number of unique words.
 
 ### Dictionaries
