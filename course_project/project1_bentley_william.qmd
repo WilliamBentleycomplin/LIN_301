@@ -1,0 +1,23 @@
+title: "Project Component 1 - Dataset & Types of Analysis"
+author: "William Bentley"
+format: html
+
+## 1. Dataset Description
+My dataset is comprised of two passages from the first and sixth (last) chants of the epic poetic prose novel *Les Chants de Maldoror* by Isidore Ducasse, through the 1874 edition made avaiable on Project Gutenberg. I make use of 400-500 words from each passage for my analysis. The dataset is entirley in French and is made avaliable for download as a public domain plain text file (495 kB) through Project Gutenberg. https://www.gutenberg.org/ebooks/12005.txt.utf-8
+
+## 2. Rationale
+I chose this dataset because Ducasse frequently changes the way the narrator Maldoror situates himself in relation to the reader and to the text itself, including the figures and events described. The text frequently shifts between first-person narration, descriptions in the third-person, and direct adress to the reader using the second person. Ducasse disorients the reader by shifting between these modes frequently and abruptly, and yet even in its unreality, a vivid and sensitive flow state is maintained throughout the text which solidifies its reality. I am interested in analyzing chants I and VI specifically because they contain the most pronounced shifts in narrative perspective and the most intense engagement with the reader, which enables me to compare how grammatical person and address function in different stages of the text. 
+
+## 3. Type of Analysis
+I plan to use comparison, pattern matching, and grammatical analysis as part of my project. I will compare slected passages from chants I and VI by examining the frequency and distribution of first-person, second-person, and third-person pronouns. I will also identify patterns of direct address to the reader, analyze their linguistic features, such as pronouns, imperatives, questions, and references to reading and the reader. My primary units of analysis will be indiivudal pronoun occurrences and instances of direct address that I will identify.   
+
+## 4. Preliminary Questions
+1.  How does the frequency and distribution of first-person, second-person, and third-person pronouns vary between the excerpts from chants I and VI?
+2. Where does direct adress to the reader occur within the selected passages, and what lingusitic deatures distinguish direct adress from conventional narration?
+3. Does the way Ducasse positions the reader through grammatical person and direct address change between these two parts of the work?
+I expect that chant I will contain a particularly high concentration of second-person forms and direct reader address because its opening explicitly establishes the relationship between the narrator and the reader. I expect chant VI will use direct address differetly because it begins by discussing the preceding chants and the narrator's relaitonship to the text. 
+
+## 5. A Look at the Data
+```
+Plût au ciel que le lecteur, enhardi et devenu momentanément féroce comme ce qu'il lit, trouve, sans se désorienter, son chemin abrupt et sauvage, à travers les marécages désolés de ces pages sombres et pleines de poison; car, à moins qu'il n'apporte dans sa lecture une logique rigoureuse et une tension d'esprit égale au moins à sa défiance, les émanations mortelles de ce livre imbiberont son âme, comme l'eau le sucre. Il n'est pas bon que tout le monde lise les pages qui vont suivre; quelques-uns seuls savoureront ce fruit amer sans danger. Par conséquent, âme timide, avant de pénétrer plus loin dans de pareilles landes inexplorées, dirige tes talons en arrière et non en avant. 
+```
