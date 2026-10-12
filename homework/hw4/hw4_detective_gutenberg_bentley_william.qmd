@@ -1,0 +1,407 @@
+---
+title: "HW 4 — Detective Gutenberg: The Full Investigation"
+subtitle: "LIN 301: Computation for Linguists"
+author: "William Bentley"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-tools: true
+jupyter: python3
+fontsize: 12pt
+---
+
+## Overview
+
+This homework is the Detective Gutenberg activity from October 7 and October 9, finished and polished into one submittable document. If you kept up with both activity days, most of the work here is already done in your `gut_detective.qmd` — this assignment asks you to bring it all together on your **final** two novels, make sure every step actually runs start to finish, and write up your verdict.
+
+Everything below has already been modeled in class — in the slides, in the activity, or in the sample solutions I walked through. There are no new techniques here. That means there's no excuse for code that doesn't run, and it also means the thing I'm actually grading is whether you can explain, in your own words, what your code is doing and why — because copying a working pattern is not the same as understanding it.
+
+**Pick your own two novels**, by two different authors, from Project Gutenberg. (Don't just turn in the class examples — *Alice in Wonderland* and *Mansfield Park* — as your submission; pick two of your own.) Everything you do should run on *your* books, not the ones from the slides.
+
+You will create **one** Quarto document named `hw4_detective_gutenberg_lastname_firstname.qmd`, living inside a folder called `hw4` in your `homework/` folder. As always, fence every chunk with ```` ```{python} ```` (not plain ```` ```python ````), and make sure your document renders cleanly to HTML before you submit.
+
+**Explain-and-disclose requirement:** under each part below, write a few sentences in your own words explaining what your code does — not what the output shows, but how the code gets there — and say whether and how you used any AI tool (ChatGPT, Copilot, autocomplete suggestions, anything) for that part. This isn't a gotcha; using these tools well is a real skill, and I'd rather know how you're using them than have you hide it. But since the exact code for this assignment is sitting in the lecture slides, an explanation of code you don't actually understand is usually easy to spot.
+
+------------------------------------------------------------------------
+
+## Part 1 — Setup and Cleaning
+
+**Goal:** download your two novels, strip off the Gutenberg header and footer from each, and end up with a clean list of lowercase words for each book.
+
+-   Download both novels (Plain Text UTF-8) into `../../data/gutenberg/` — or wherever your `hw4` folder expects them — with clear filenames.
+-   Read each one in with `.readlines()`, inside a `try`/`except` so a bad filename doesn't crash the whole document.
+
+```{python}
+import re
+import matplotlib.pyplot as plt
+
+try:
+    with open("../../data/gutenberg/great_gatsby.txt", "r", encoding="utf-8") as f:
+        great_gatsby_lines = f.readlines()
+    with open("../../data/gutenberg/candide.txt", "r", encoding="utf-8") as f:
+        candide_lines = f.readlines()
+except FileNotFoundError:
+    print("Couldn't find a file — check the filename and location.")
+```
+
+-   Use your `while` loops to chop the header off the front and the footer off the back of each book, the same way you did with *Alice*.
+
+```{python}
+while not great_gatsby_lines[0].startswith("*** START"):
+    great_gatsby_lines = great_gatsby_lines[1:]    
+great_gatsby_lines = great_gatsby_lines[1:]        
+
+while not great_gatsby_lines[-1].startswith("*** END"):
+    great_gatsby_lines = great_gatsby_lines[:-1]    
+great_gatsby_lines = great_gatsby_lines[:-1]        
+
+great_gatsby_text = "".join(great_gatsby_lines)
+
+while not candide_lines[0].startswith("*** START"):
+    candide_lines = candide_lines[1:]    
+candide_lines = candide_lines[1:]       
+
+while not candide_lines[-1].startswith("*** END"):
+    candide_lines = candide_lines[:-1]    
+candide_lines = candide_lines[:-1]       
+
+candide_text = "".join(candide_lines)
+```
+
+-   Glue the lines back together, lowercase, and split into words with `re.split()`, removing any empty strings left behind.
+
+```{python} 
+great_gatsby_words = re.split(r"[\W]+", great_gatsby_text.lower())
+great_gatsby_words = [w for w in great_gatsby_words if w != ""]
+
+candide_words = re.split(r"[\W]+", candide_text.lower())
+candide_words = [w for w in candide_words if w != ""]
+```
+
+*I imported re for regular-expressions to maipulate the text files I downloaded from Project Gutenberg, then I imported matplotlib.pyplot for plotting charts later. I used try to open the text files for The Great gatsby by F. Scott Fitzgerald and Candide by Voltaire for the ../../data/gutenberg/ directory, and readlines() to store each file as a list of lines. I used except to print a file not found error message in case the file could not be found to prevent the program from crashing. I then used while loops to remove the header and footer from each text. I was able to use startswith() to remove lines by list slicing until the the loop reached the lines that contained START and END and then I got rid of those lines. I finally used "".join() to combine the cleaned lines back into a single string for each text. I did not use AI for this section since we went over this code in class. Instead, I only subsituted the alice.txt and mansfield.txt labels with the titles of the two novels and kept the other parts of the code the same. *
+
+------------------------------------------------------------------------
+
+## Part 2 — Tokens, Types, and a Fair Comparison
+
+**Goal:** compare the vocabulary richness of your two books, correctly.
+
+-   For each book, report the total word count (tokens), the number of unique words (types), and the type–token ratio. 
+
+*Gatsby tokens: 50,005, Candide tokens: 36,174, Gatsby unique types: 5,840, Candide unique types: 5,122, Gatsby TTR: 0.1168, Candide TTR: 0.1416*
+
+```{python}
+print("Gatsby tokens:", len(great_gatsby_words))
+print("Candide tokens:", len(candide_words))
+print("Gatsby unique types:", len(set(great_gatsby_words)))
+print("Candide unique types:", len(set(candide_words)))
+```
+```{python}
+great_gatsby_ttr = len(set(great_gatsby_words)) / len(great_gatsby_words)
+candide_ttr = len(set(candide_words)) / len(candide_words)
+print("Great Gatsby TTR:", great_gatsby_ttr)
+print("Candide TTR:", candide_ttr)
+```
+
+-   Compare the two raw TTRs — which book looks like it has the richer vocabulary?
+
+*It appears that Candide has a richer vocabulary than The Great Gatsby since it has a higher TTR.*
+
+-   Now compute the TTR of just the first 10,000 words of each book, and compare again. Explain, in your own words, why this second comparison is the fairer one.
+
+*Candide has a TTR of 0.2368 at the first 10,000 words while The Great Gatsby has a TTR of only 0.2283 at the first 10,000 words. It appears that Candide still has a richer vocabulary than The Great Gatsby since it maintains a higher TTR even when calculated from the first 10,000 words of the text. This comparison is fairer because both texts are being measured using the same number of words, which reduce sthe influence of difference between their total lengths.*
+
+```{python}
+great_gatsby_ttr_10000 = len(set(great_gatsby_words[:10000])) / len(great_gatsby_words[:10000])
+candide_ttr_10000 = len(set(candide_words[:10000])) / len(candide_words[:10000])
+print("Great Gatsby TTR (10,000 words):", great_gatsby_ttr_10000)
+print("Candide TTR (10,000 words):", candide_ttr_10000)
+```
+
+-   Report the average word length for each book.
+
+*The Great Gatsby has an average word length of 4.13 letters per word, while Candide has an average word length of 4.36 letters per word.*
+
+```{python}
+great_gatsby_wd_len_total = 0
+for w in great_gatsby_words:
+    great_gatsby_wd_len_total += len(w)
+great_gatsby_avg_word_len = great_gatsby_wd_len_total / len(great_gatsby_words)
+
+candide_wd_len_total = 0
+for w in candide_words:
+    candide_wd_len_total += len(w)
+candide_avg_word_len = candide_wd_len_total / len(candide_words)
+
+print("Great Gatsby Average Word Length:", great_gatsby_avg_word_len)
+print("Candide Average Word Length:", candide_avg_word_len)
+``` 
+
+*Explain your code for this part, and disclose any AI use. I used len() i n order to count the total number of words in each novel by measuring the length of the great_gatsby_words and candide_words lists. The counts represent tokens, which means that every appearence of a word is counted, even if it repeats itself. I then used set() to remove duplicate words (to ensure a accurate TTR by preserving distinct words) and then len() to count each unique word in each text. I then divided the number of unique types by the total number of tokens to get the TTR. The higher a TTR, the larger the amount of different words in comparison to the total number of words in a text. I purposely chose two texts I knew were similar in length to get a more intertetsing and accurate comparison. Then I used list slicing to select the first 10,000 words from each text. I used set() and len() to cont the unique word sin the sleection of 10,000 words and then calculated the TTR in the same way before. Even thought the two texts are similar in length anyway using the first 10,000 words made the comparison fair because the selections were equal in size. Candide had a higher TTR than Gatsby but the difference was small. For average word length, I made a variable for the word length of each text at zero, then I used a for loop to go through every or din each word list, and adding len(w) to the total. Finally, I divided the total word length by the number of words to get the average word length. Candide has a higher average, at 4.36 letters per word, while The Great Gatsby has an average word length of 4.13 letters per word. I only used AI when prompted to autofill code I was in the middle of writing which I reocogized was not going to fill my code with code which I did not need. If the autofill was not useful I ignored and wrote the rest myself. I understood list slicing from hw3.*
+
+------------------------------------------------------------------------
+
+## Part 3 — Affixes, Dialogue, and Common Words
+
+**Goal:** find measurable differences between your two authors' styles.
+
+-   Report each book's rate of **-ly** words per 1,000 words, and look at the actual list — are they all adverbs, or does something else sneak in?
+
+*The Gatsby ly rate per 1000 words is 16.9, while the candide ly rate per 1000 words is 10.5. Not all of the word sin each list are adverbs, Gatsby contained words like "only" and "fly", while Candide contained words like "italy" and "family".*
+
+```{python}
+great_gatsby_ly = [w for w in great_gatsby_words if w.endswith("ly")]
+candide_ly = [w for w in candide_words if w.endswith("ly")]
+great_gatsby_ly_rate = len(great_gatsby_ly)/len(great_gatsby_words) * 1000
+candide_ly_rate = len(candide_ly)/len(candide_words) * 1000
+
+print("Gatsby ly count:", len(great_gatsby_ly))
+print("Candide ly count:", len(candide_ly))
+
+print("Gatsby ly rate per 1000 words:", great_gatsby_ly_rate)
+print("Candide ly rate per 1000 words:", candide_ly_rate)
+
+print("Gatsby ly list example:", great_gatsby_ly[:50])
+print("Candide ly list example:", candide_ly[:50])
+```
+
+-   Pick **three more affixes** of your own choosing and report the per-1,000-word rate of each, for both books.
+
+*Gatsby un rate per 1000 words: 4.7, Candide un rate per 1000 words: 2.4, Gatsby ness rate per 1000 words: 1.6, Candide ness rate per 1000 words: 1.7 Gatsby ment rate per 1000 words: 2.8, Candide ment rate per 1000 words: 1.6*
+
+```{python}
+great_gatsby_un = [w for w in great_gatsby_words if w.startswith("un")]
+candide_un = [w for w in candide_words if w.startswith("un")]
+
+great_gatsby_ness = [w for w in great_gatsby_words if w.endswith("ness")]
+candide_ness = [w for w in candide_words if w.endswith("ness")]
+
+great_gatsby_ment = [w for w in great_gatsby_words if w.endswith("ment")]
+candide_ment = [w for w in candide_words if w.endswith("ment")]
+
+print("Gatsby un rate per 1000 words:", len(great_gatsby_un)/len(great_gatsby_words) * 1000)
+print("Candide un rate per 1000 words:", len(candide_un)/len(candide_words) * 1000)
+
+print("Gatsby ness rate per 1000 words:", len(great_gatsby_ness)/len(great_gatsby_words) * 1000)
+print("Candide ness rate per 1000 words:", len(candide_ness)/len(candide_words) * 1000)
+
+print("Gatsby ment rate per 1000 words:", len(great_gatsby_ment)/len(great_gatsby_words) * 1000)
+print("Candide ment rate per 1000 words:", len(candide_ment)/len(candide_words) * 1000)
+```
+
+-   Using your header-free lines from Part 1, report what percentage of each book's lines contain dialogue, however your book happens to mark it.
+
+*Gatsby dialouge percentage: 25.23%, Candide dialouge percenatge: 24.10%*
+
+```{python}
+great_gatsby_nonempty_lines = [line for line in great_gatsby_lines if line.strip() !=""]
+candide_nonempty_lines = [line for line in candide_lines if line.strip() !=""]
+
+
+great_gatsby_dialouge_lines = [line for line in great_gatsby_nonempty_lines if '“' in line]
+candide_dialouge_lines = [line for line in candide_nonempty_lines if '"' in line]
+
+great_gatsby_dialouge_percentage = (len(great_gatsby_dialouge_lines)/len(great_gatsby_nonempty_lines) * 100)
+candide_dialouge_percentage = (len(candide_dialouge_lines)/len(candide_nonempty_lines) * 100)
+
+print("Gatsby dialouge lines:", len(great_gatsby_dialouge_lines))
+print("Candide dialouge lines:", len(candide_dialouge_lines))
+
+print("Gatsby nonempty lines:", len(great_gatsby_nonempty_lines))
+print("Candide nonempty lines:", len(candide_nonempty_lines))
+
+print("Gatsby dialouge percentage:", great_gatsby_dialouge_percentage)
+print("Candide dialouge percentage:", candide_dialouge_percentage)
+```
+
+-   Report each book's **10 most common content words** (after removing stopwords), and say what they suggest about each book's characters, setting, or themes.
+
+*Gatsby most common words: [('gatsby', 264), ('tom', 191), ('daisy', 186), ('don', 98), ('house', 95), ('eyes', 89), ('mr', 84), ('time', 83), ('wilson', 77), ('way', 75)]
+Candide most common words: [('candide', 410), ('cunegonde', 138), ('martin', 118), ('pangloss', 103), ('cacambo', 84), ('woman', 65), ('world', 55), ('answered', 47), ('country', 46), ('thousand', 46)]
+Both texts have a signicant number of mentions of character names, which would lead me to believ ethat each text is more character driven rather than strictly plot driven.
+
+```{python}
+from collections import Counter
+
+stopwords = ["the", "to", "and", "of", "a", "her", "i", "in", "was", "it", "she", "he", "be", "that","you", "not", "had", "as", "his", "for", "with", "is", "have", "but", "at", "so", "all", "my", "been", "him",
+"on", "by", "could", "would", "very", "no", "what", "which", "they", "were", "there", "me", "an", "must", "this", "said", "from", "or", "will", "any", "much", "than", "such", "their", "them", "if", "do",
+"did", "one", "when", "your", "more", "are", "we", "who", "up", "out", "down", "into", "s", "t", "then", "over", "back", "came", "like", "two", "old", "upon", "us", "d", "about", "then", "over", "just", "little", "some", "now", "how","has", "good", "great", "man", "before", "after", "went", "beyond", "between", "made", "well", "am", "after", "know","didn" , "didn't", "got", "come", "looked", "see", "only", "our", "each", "either", "both", "few", "many", "most", "other", "somebody", "someone", "something", "anybody", "anyone", "anything", "should", "those", "where", "ll", "about", "above", "across", "during", "inside", "outside", "m", "these",]
+
+great_gatsby_content = [w for w in great_gatsby_words if w not in stopwords]
+candide_content = [w for w in candide_words if w not in stopwords]
+
+great_gatsby_common = Counter(great_gatsby_content).most_common(10)
+candide_common = Counter(candide_content).most_common(10)
+
+print("Gatsby most common words:", great_gatsby_common)
+print("Candide most common words:", candide_common)
+```
+*I used list comprehension and the endswith() method to gather words that ending with -ly in each text. I then ocunted the mathcing words and divided each count by the total number of tokens and multiplied by 1,000 to get the ly rate per 1,000 words. I also printed the first 50 words of each text so I could verify that the code worked and provide an example. Gatsby had a higher rate of words ening in ly than Candide. Since not every word with this ending is an adverb, the rate really measures a spelling pattern instead of actual adverb usage. I chose the affixes un-, -ness, and -ment to compare different rates of these affixes in each text. I used startswith() to gather words that began with un-, and endswith() to gather words ending in -ness or -ment. I calculated the rate pf each affix per 1,000 words in the same way as the ly rate. Gatsby had higher rates for un- and -ment, and Candide had a slightly higher rate for -ness. Like ly, the code only measures the rates by their spelling instead of their actual grammatical function, so the results are approximate. Then I use dlist comprehensions and strip() to create list sof nonempty lines form the header-free text. I selected lines contained the appropriate quotation marks used in the texts to identify and count the dialouge. I divided each ount by the total number  of nonempty lines and mutiplied by 100 to get the dialouge percentage. The method doesn't measure the proportion of words spoken by characters, only how frequently dialouge appears in each text. I also had to use different quotation marks for each text to ensure accurate counting. I pasted a list of stopwords that you had provided to filter out common words that would obscure the results of the 10 most common words analysis. I used w to mean word and identify the word snot included in the stopwords list. I then used Counter() and .most_common(10) to identify the 10 most common words in each text after filtering out stopwords.Both texts have a signicant number of mentions of character names, which would lead me to believ ethat each text is more character driven rather than strictly plot driven. I also had to continuously expand the list of stopwords and run the code again to filter out words not accounted for in the original list. Like previously, I used AI only when it sugggested finishing code I was already writing. It suggested the w variable to me but that was the only part of the code that I had not planned previously. I had some sytax errors but only for stopword lies in which I had forgotten to enclose in quotes which I did without AI asisstance.*
+
+------------------------------------------------------------------------
+
+## Part 4 — Visualize It
+
+**Goal:** show your findings as charts.
+
+-   Make **one bar chart** comparing your two authors on a single measure of your choice from Part 3.
+```{python}
+books = ["The Great Gatsby - F. Scott Fitzgerald", "Candide - Voltaire"]
+ly_rates = [great_gatsby_ly_rate, candide_ly_rate]
+
+plt.figure(figsize=(10, 6))
+plt.bar(books, ly_rates)
+plt.title("Words Ending In -ly per 1,000 Words")
+plt.xlabel("Novel and Author")
+plt.ylabel("Rate per 1,000 Words")
+plt.savefig("ly_rate_comparison_chart.png")
+plt.show()
+```
+-   Make **one Zipf plot** — rank vs. frequency, log scale on both axes — with **both** books on the same chart, each with its own label and a legend.
+-   Every chart needs a title, axis labels, and should be saved to a file with `plt.savefig()`.
+
+```{python}
+great_gatsby_freq = Counter(great_gatsby_words)
+candide_freq = Counter(candide_words)
+
+great_gatsby_freqs = sorted(great_gatsby_freq.values(), reverse=True)
+candide_freqs = sorted(candide_freq.values(), reverse=True)
+
+great_gatsby_ranks = range(1, len(great_gatsby_freqs) + 1)
+candide_ranks = range(1, len(candide_freqs) + 1)
+
+plt.figure(figsize=(10, 6))
+plt.plot(great_gatsby_ranks, great_gatsby_freqs, label="The Great Gatsby")
+plt.plot(candide_ranks, candide_freqs, label="Candide")
+
+plt.xscale("log")
+plt.yscale("log")
+plt.title("Word Frequency By Rank")
+plt.xlabel("Word rank (log scale)")
+plt.ylabel("Frequency (log scale)")
+plt.legend()
+plt.savefig("zipf_rank_comparison_chart.png")
+plt.show()
+```
+
+
+*I used matplotlib to create the bar chart and Zipf plot to compare each text. For the bar chart, I used the ly rates that I calculated in Part 3 and used the plt.xlabel to label the text title and author and the plt.ylabel to plot the rate per 1000 words. I put the ly rates in a single list to make it easier to pass to the plt.bar function. For the Zipf plot, I used Counter(great_gatsby_words) and Counter(candide_words) to count every time eah word appears in each text. I used .values() to retieve the frequency counts without the word strings. I then used sorted() to order the frequencies form largest to smallest. I used range to create the rank numbers for the horizontal axis. Each plt.plot was used to label the text and plot the frequency of each word by its rank. plt.xscale("log") and plt.yscale("log") were used to set both axes to a log scale. plt.legend() displayed the labels and plt.savefig() saves the chart as an image. I used AI to auto fill the .values() and reverse=True commands as I was unsure of the exact syntax. It also autofilled the figize(10,6)) but other than that the other parts of the code I adapted from previous charting activities with alice.text and mansfield.txt. The log functions I knew to use beforehand based on prior experience using online graphs.*
+
+------------------------------------------------------------------------
+
+## Part 5 — The Verdict
+
+Below your code, write a short paragraph:
+
+-   What makes each author's style distinctive, based on what you measured?
+-   Which measure was the most revealing? Which was the least useful?
+-   If someone handed you an anonymous chapter, which single measure would you reach for first to guess the author, and why?
+
+*The measurements suggest that Fitzgerald is generally the more descriptive writer than Voltaire, yet both appear to focus mainly on characters rather than setting. This is shown my Gatsby having a significantly higher ly count compared to Voltaire, which suggests that Fitzgeralds writing is more descriptive in comparison to Voltaire. Gatsby also had higher un and ment rates while Candide only just barley had a higher ness rate, which further suggests that while Voltaire is descriptive, Fitzgerald's writing is more rich in imagery and detail. The abundance of character names in the 10 most common word sin both texts however suggests that both are focus on character development and interaction rather than setting or environment, which interesting considered Fitzgeralds imaginative writing style, this could suggest that is more descriptive with his character sthan his setting. The most revealing measure was the TTr calculated form the first 10,000 words, because it compared equal-size samples which allowed for a fairer comparison between the two texts and reduced the influence of the texts' different lengths on the TTR. The last useful measure was the raw full-text TTrm since the differing token lengths between the two texts don't allow for a fair comparison since TTR is depenendent on a similar text length. If I where given an anonymous chapter, I would most likley look out for how many words ending in ly there were, or how many instances of dialouge since the difference between the two texts is staggering given their similar lengths. Candides higher TTR would be less useful since the texts are so similar anyway.*
+------------------------------------------------------------------------
+
+## Part 6 — Reflection
+
+A short (4–6 sentence) reflection:
+
+-   What was the biggest difference between running this activity in class on Day 1/2 and finishing it on your own for homework?
+-   Of everything you found, what's the most interesting or surprising result?
+-   Overall, where did you lean most on an AI tool, if anywhere — and where did you deliberately not use one? Why?
+
+*The biggest difference between doing this activity in class and completing it for homework was the change from being able to rely on the skeleton code provided in the alice.txt/mansfield.txt example/examples for the first half of the assignment and having to come up with code myself for the second half without a guided class. I had to rely more on my own prior knowledge and make sure I could keep track of all of the different variables I had to label base don each text, since I would be keeping up with the same two texts for a longer period of time than I was used to in class. The most interesting result to me was that Gtasby had a singificantly higher dialouge line count compared to Candide, which you wouldn't except given Gatsby also had a significantly higher ly count, which woudl suggest the novle is less dialouge heavy and more focused on description, given the similar length of the two texts. I learned the most on an Ai tool when I had to autocomplete a cod eI wa swriting out but did not necessarily understand how finish, and then the AI would suggest something I recogized form classes previous or something I did not recognize but knew would be more useful to me if I let it guide me, specifically on the plotting of the graphs, in which the the providng of the .values method and the proper formatting of the graph made the code run a lot smoother. I intentionally didn't use AI to aufofill every label, buecause often it would suggest switching everything I had written out, depsite the fact tha tI had many labels that I needed to kept straight in my code anyway. i also didn't let AI autofill my datat, since it would often just insert random numbers rather than the reuslts I actually yeilded.* 
+
+------------------------------------------------------------------------
+
+## Quick Reference
+
+Here is a quick reference for the Python techniques you will need to use in this assignment. You can copy and paste these snippets into your own code, but make sure you understand what each one does before you do.
+
+| What you need to do | How |
+|---|---|
+| Read a file line by line | `with open(path, encoding="utf-8") as f: lines = f.readlines()` |
+| Handle a bad filename without crashing | `try: ... except FileNotFoundError: ...` |
+| Chop lines off the front while a condition holds | `while not lines[0].startswith("..."): lines = lines[1:]` |
+| Chop lines off the back while a condition holds | `while not lines[-1].startswith("..."): lines = lines[:-1]` |
+| Glue a list of lines back into one string | `"".join(lines)` |
+| Split text into words, removing punctuation | `re.split(r"[\W]+", text.lower())`, then drop empty strings |
+| Count tokens / types / TTR | `len(words)`, `len(set(words))`, `len(set(words)) / len(words)` |
+| Slice the first N items | `words[:10000]` |
+| Running total inside a loop | `total = 0` then `total += len(w)` for each `w` |
+| Turn a count into a rate per 1,000 | `count / len(words) * 1000` |
+| Check the start/end of a string | `word.startswith("un")`, `word.endswith("ly")` |
+| Build a filtered list in one line | `[w for w in words if condition(w)]` |
+| Count and rank items | `Counter(words).most_common(n)` |
+| Bar chart | `plt.bar(labels, values)` |
+| Line chart with a log–log scale | `plt.plot(ranks, freqs)` then `plt.xscale("log")`, `plt.yscale("log")` |
+| Multiple lines on one chart with a legend | `plt.plot(x, y, label="...")` for each, then `plt.legend()` |
+
+------------------------------------------------------------------------
+
+## Submission
+
+Your `LIN_301` repo is public, so instead of uploading a file to Canvas, you'll submit a **link** straight to your `homework/hw4` folder on GitHub.
+
+1.  **Render your document.** Make sure your `.qmd` renders cleanly to HTML.
+2.  **Push everything.** Stage, commit, and push your entire `homework/hw4` folder — your `.qmd`, the rendered `.html`, both novel `.txt` files, and any saved chart images — to your `LIN_301` GitHub repo.
+3.  **Get the folder's GitHub address.** On github.com, navigate into your repo to `homework/hw4`, and copy the URL from your browser's address bar. It'll look like:
+
+    ```
+    https://github.com/your-username/LIN_301/tree/main/homework/hw4
+    ```
+
+4.  **Submit that link on Canvas** — no file upload needed.
+5.  Be sure to replace "lastname_firstname" with your actual last name and first name in your `.qmd` filename.
+
+------------------------------------------------------------------------
+
+## Grading Rubric (100 pts total)
+
+### Part 1 — Setup and Cleaning (15 pts)
+
+| Criteria | Points |
+|-----------------------------------------|:-----------------------------:|
+| Both novels downloaded, loaded, and correctly cleaned (headers/footers removed, lowercased, split, empties removed) | 10 |
+| Explanation of the code holds up and matches what it actually does | 5 |
+
+### Part 2 — Tokens, Types, and a Fair Comparison (20 pts)
+
+| Criteria | Points |
+|-----------------------------------------|:-----------------------------:|
+| Tokens, types, TTR, 10,000-word TTR, and average word length all correctly computed for both books | 10 |
+| Correctly explains why the 10,000-word comparison is fairer than the raw one | 5 |
+| Explanation of the code holds up | 5 |
+
+### Part 3 — Affixes, Dialogue, and Common Words (20 pts)
+
+| Criteria | Points |
+|-----------------------------------------|:-----------------------------:|
+| -ly rate, three chosen affixes, dialogue percentage, and top-10 content words all correctly computed for both books | 12 |
+| Genuine engagement with what the results suggest about each author/book | 3 |
+| Explanation of the code holds up | 5 |
+
+### Part 4 — Visualize It (15 pts)
+
+| Criteria | Points |
+|-----------------------------------------|:-----------------------------:|
+| Bar chart and dual-book Zipf plot both correct, labeled, and saved to file | 10 |
+| Explanation of the code holds up | 5 |
+
+### Part 5 — The Verdict (10 pts)
+
+| Criteria | Points |
+|-----------------------------------------|:-----------------------------:|
+| Specific, well-reasoned answers grounded in the student's own results | 10 |
+
+### Part 6 — Reflection & AI Disclosure (15 pts)
+
+| Criteria | Points |
+|-----------------------------------------|:-----------------------------:|
+| Thoughtful, specific answers to the reflection prompts | 8 |
+| Honest, specific AI-use disclosure (including "I didn't use one," if true) at each point it was asked for | 7 |
+
+### Presentation & Reproducibility (5 pts)
+
+| Criteria | Points |
+|-----------------------------------------|:-----------------------------:|
+| File named correctly; document renders without errors; code and answers clearly organized by part; GitHub link points to the `hw4` folder | 5 |
