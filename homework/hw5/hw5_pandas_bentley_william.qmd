@@ -1,0 +1,77 @@
+---
+title: hw5 Pandas-monium Your Fandom in a Table 
+author: William Bentley
+format: html
+---
+
+Note: All Lyrics come from Bob Dylan's official website: https://www.bobdylan.com/songs/
+Songs Featured: "Desolation Row", "Joey", "Brownsville Girl", "Highlands", "Murder Most Foul"
+
+* The first thing I did was import pandas and read the text file by using "import pandas as pd" so that I can use pandas to organize Dylan's lyrics into a table. The open() function opens my text file, and readlines() reads the contents into a list which I labeled raw_lines. Each item is the list represents one line from the file. I used UTF-8 encoding to read the text, and I converted it into a variable called "f" to prevent the file from crashing. 
+
+```{python}
+import pandas as pd
+
+with open("hw5_raw.txt", "r", encoding="utf-8") as f:
+    raw_lines = f.readlines()
+```
+
+* I created an empty list that I labeled "rows" to hold the information for the table. I created the variable "dylan_song" to keep track of the song that is being processed by the code block, and I created the variable "line_number" to count the lyric lines within each Dylan song. The "for" loop processes every line from my raw text file, and the strip() method rmeoves the whitespace from the beginning and end of each line. The first "if" condition doesn't count blank lines and source-information lines by distinguishing them from the lyrics. The next condition identifies lines that begin with "Song:", and when one of them is found, the song title is recorded and the line counter resets. If one of the lines is not a song title, then the program will check if a song title has been recorded already. It then increases the line number and adds a dictionary containing the song title, line number, and lyric line to "rows". "pd.DataFrame(rows)" coverts the list of dictionaries into a DataFrame, with each dictionary beocming a row. The "head(10)" method displays the first 10 rows, "len(df)" tells me how many rows are in the DataFrame, and "df.columns" displays the column names. 
+
+```{python}
+rows = []
+dylan_song = ""
+line_number = 0
+
+for raw_line in raw_lines:
+    line = raw_line.strip()
+
+    if line != "" and not line.startswith("Source:") and not line.startswith("Songs:"):
+        if line.startswith("Song:"):
+            dylan_song = line.replace("Song:", "", 1).strip()
+            line_number = 0
+        else:
+            if dylan_song != "":
+                line_number += 1
+
+                rows.append({"song": dylan_song, "line_number": line_number, "line": line})
+        
+df = pd.DataFrame(rows)
+    
+print(df.head(10))
+print(len(df))
+print(df.columns)
+```
+
+* I added three columns using pandas. The first column, "length", uses ".str.len()" to count the number of characters in each lyric line. The second column, "ends_with_a_question_mark", uses ".str.endswith("?")"" to check if each line line ends with a question mark. The thir dcolumn, "is_highlands", compares the song title in each row with "Highlands". It produces "True" for lines from that song and "False" for lines from the other songs. I am able to analyze the lyrics using features calculated from the text instead of just storing the original lines. I used "head(10)" to check again that the new columns have been added and their values are consistent with the text.
+
+```{python}
+
+df["length"] = df["line"].str.len()
+df["ends_with_a_question_mark"] = df["line"].str.endswith("?")
+df["is_highlands"] = df["song"] == "Highlands"
+print(df.head(10))
+```
+
+* I saved the DataFrame as a CSV file using "to-csv()". The argument "index=False" prevents pandas from writing its row index as an additional column, and "encoding="utf-8-sig"" helps keep the text's characters in the correct format when the file is opened in spreadhseet programs. I then used "pd.read_csv()" to load the saved file into a DataFrame called "check". I printed the row counts for both DataFrames so that I could see whether they matched, and display the first 10 rows and the column names of the reloaded table. I was able to verify that the saved CSV could be read back.  The original and rloaded dataframes both contain 548 rows in my current run. The matching row counts indicate that the CSV was saved and loaded without any problems.
+
+```{python}
+df.to_csv ("hw5_bentley_william.csv",
+    index=False,
+    encoding="utf-8-sig")
+
+check = pd.read_csv("hw5_bentley_william.csv")
+
+print("Original row count:", len(df))
+print ("Reloaded row count:", len(check))
+print(check.head(10))
+print(check.columns)
+print(df["song"].value_counts())
+```
+
+## Paragraph ##
+
+Each line from one of the five Bob Dylan songs I picked is represented in each row in the DataFrame. I removed blank lines and the source-information lines, and I used the headings of the songs to idenify which song each lyric is apart of. The headings are used to organize the data instead of be identified as lyrics. The "length" column measures the number of character sin each lyric, "ends_with_a_question_mark" identifies lines that end with question marks, "is_highlands" identifies lines that belong to the song "Highlands". One observation that I noticed from my results is that none of the first ten lines of "Desolation Row" ends with a question mark, and that the song itself has only two instances, both of which ar eat the end, and one of which is quoting another song itself. I can use these existing columns and add columns to analyze patterns across all of the songs, and am given much more range with this system of organization. I used AI only when it suggested code for me to autofill a line I was already writing, such as when it suggested the labels for the "rows.append" portion of the code, or the ".value_counts()" portion fo the code. Anything else I used I acessed from the previous pandas slides, such as to help build my "if/else" code.
+
+
+
