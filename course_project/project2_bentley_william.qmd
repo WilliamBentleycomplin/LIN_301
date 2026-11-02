@@ -1,0 +1,146 @@
+---
+title: Project Component 2 Cleaning and Processing
+author: William Bentley
+format: html
+---
+## 1. The Raw Data
+
+My dataset consists of the French text of Les Chants de Maldoror by Isidore Ducasse, and the version I an using as my raw text comes from Project Gutenberg. https://www.gutenberg.org/ebooks/12005.txt.utf-8. The work is divided into six chants, which provide the basis for organizing my datatset. I am using the text to prepare a word-level daraset for the analysis that I proposed in Component 1. The only thing that has changed about my dataset is that I plan including material from all six chants to better analyze the progression of the use of first-person, second-person, and first-person pronouns by the narrator, but I am still using the same raw text file that I originally selected in Component 1.
+
+```{python}
+import re
+import pandas as pd
+
+with open("project_data/maldoror.txt", "r", encoding="utf-8") as f:
+    raw_text = f.read()
+
+lines = raw_text.splitlines()
+
+while not lines[0].startswith("*** START"):
+    lines = lines[1:]
+
+lines = lines[1:]
+
+while not lines[-1].startswith("*** END"):
+    lines = lines[:-1]
+
+lines = lines[:-1]
+
+raw_text = "\n".join(lines)
+
+print(raw_text[:500])
+```
+
+## 2. Cleaning Steps
+
+I first read the text file into Python using "open()" and "read()". I split the text into lines and used while loops to remove the Project Gutenberg header and footer. I then searched the remaining lines for the six chant headings and recorded their indices. Using these indices, I extracted the text belonging to each chant. I converted the text to lowercase and used "re.split(r"[\W]+", ...)" to separate it into word tokens. I removed empty strings with a list comprehension and stored each word alongside its chant label in a list of dictionaries. One cleaning decision that I made was to convert all words to lowercase, which makes differently capitalize dforms count as the same word, but also removes distinctions betwene proper names and words that appear at the beginning of a sentence. Fortunatley, proper names are not prominent in the raw text, and this does not affect signifcantly what I will be tracking throughout the project. A more significant step that affects my project is the splitting method, which separates contractions and hyphenated words at punctuation which can affect french words like "l'homme" and "l'adore", but those words are still easily identifiable and does not effect standalone French pronouns like "Il", "Tu", and "Je".
+
+```{python}
+
+headings = [
+    "CHANT PREMIER",
+    "CHANT DEUXIÈME",
+    "CHANT TROISIÈME",
+    "CHANT QUATRIÈME",
+    "CHANT CINQUIÈME",
+    "CHANT SIXIÈME"
+]
+
+text_lines = raw_text.splitlines()
+
+for line in text_lines:
+    if "CHANT" in line.upper():
+        print(repr(line))
+
+heading_indices = []
+
+for heading in headings:
+    found = False
+
+    for i in range(len(text_lines)):
+        if text_lines[i].strip() == heading:
+            heading_indices.append(i)
+            found = True
+            break
+
+    if not found:
+        print("Heading not found:", heading)
+
+print("Heading indices:", heading_indices)
+
+rows = []
+
+if len(heading_indices) == len(headings):
+    for i in range(len(headings)):
+        start = heading_indices[i] + 1
+
+        if i < len(headings) - 1:
+            end = heading_indices[i + 1]
+        else:
+            end = len(text_lines)
+
+        chant_text = "\n".join(text_lines[start:end])
+
+        words = re.split(r"[\W]+", chant_text.lower())
+
+        words = [w for w in words if w != ""]
+
+        for w in words:
+            rows.append({"word": w, "chant": headings[i]})
+
+print("First 20 rows:")
+print(rows[:20])
+
+print("\nLast 20 rows:")
+print(rows[-20:])
+
+print("\nTotal word tokens:", len(rows))
+```
+
+## 3. The Clean Table
+
+Each row represents one word token in the order it appears in the text. The word column contains the cleaned, lowercase word, and the chant column identifies the chant from which it came. The table contains 80,776 rows. I converted the list of dictionaries into a pandas DataFrame and inspected its lenth, first rows, last rows, and column names before saving it as a CSV file.
+
+```{python}
+
+df = pd.DataFrame(rows)
+
+print("Number of rows:", len(df))
+
+print("\nFirst rows:")
+print(df.head())
+
+print("\nLast rows:")
+print(df.tail())
+
+print("\nColumn names:")
+print(df.columns.tolist())
+
+print("\nNumber of words in each chant:")
+print(df["chant"].value_counts().sort_index())
+```
+
+## 4. Still Messy
+
+I will have to deal with the separation between contractions in french text and the loss of distinction between capitialization of proper nouns and the captitialization as well as punctuaiton which distinguishes sentences. Neither of these things affects the purpose of my analysis too significantly but without the contraction distinctions it can make analyzing the influence of pronouns in different tenses in relaiton to the context of passages I would be analyzing more difficult, but it still does not undermine the primary goal of my analysis.
+
+```{python}
+
+df.to_csv("project2_bentley_william.csv", index=False, encoding="utf-8-sig")
+
+check = pd.read_csv("project2_bentley_william.csv")
+
+print("Original number of rows:", len(df))
+print("Reloaded number of rows:", len(check))
+
+print("\nOriginal columns:")
+print(df.columns.tolist())
+
+print("\nReloaded columns:")
+print(check.columns.tolist())
+
+print("\nFirst rows of the reloaded CSV:")
+print(check.head())
+```
+
+* AI use disclosure: I used ChatGPT to review and correct my written code due to an error I kept recieving about identifing "CHANT PREMIERE"  and it identified an issue with the formatting of the raw text file itself which necessitated the inclusion of the command "for line in text_lines: if "CHANT" in line.upper(): print(repr(line))". In addition it offered slight code formatting and labeling corrections, such as inconistencies I had made in labeling such as "text_lines" vs "lines". I then corrected my original code and replaced it with the revised code while retaining the parts of the code I had correct originally. 

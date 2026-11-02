@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="William Bentley">
+
+<title>Project Component 2 Cleaning and Processing</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="project2_bentley_william_files/libs/clipboard/clipboard.min.js"></script>
+<script src="project2_bentley_william_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="project2_bentley_william_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="project2_bentley_william_files/libs/quarto-html/popper.min.js"></script>
+<script src="project2_bentley_william_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="project2_bentley_william_files/libs/quarto-html/anchor.min.js"></script>
+<link href="project2_bentley_william_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="project2_bentley_william_files/libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="project2_bentley_william_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="project2_bentley_william_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="project2_bentley_william_files/libs/bootstrap/bootstrap-917079515d91bccb85b543faf8aa8bb6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Project Component 2 Cleaning and Processing</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>William Bentley </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="the-raw-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-raw-data">1. The Raw Data</h2>
+<p>My dataset consists of the French text of Les Chants de Maldoror by Isidore Ducasse, and the version I an using as my raw text comes from Project Gutenberg. https://www.gutenberg.org/ebooks/12005.txt.utf-8. The work is divided into six chants, which provide the basis for organizing my datatset. I am using the text to prepare a word-level daraset for the analysis that I proposed in Component 1. The only thing that has changed about my dataset is that I plan including material from all six chants to better analyze the progression of the use of first-person, second-person, and first-person pronouns by the narrator, but I am still using the same raw text file that I originally selected in Component 1.</p>
+<div id="f2d277e1" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"project_data/maldoror.txt"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> f:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    raw_text <span class="op">=</span> f.read()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>lines <span class="op">=</span> raw_text.splitlines()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="kw">not</span> lines[<span class="dv">0</span>].startswith(<span class="st">"*** START"</span>):</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    lines <span class="op">=</span> lines[<span class="dv">1</span>:]</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>lines <span class="op">=</span> lines[<span class="dv">1</span>:]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="kw">not</span> lines[<span class="op">-</span><span class="dv">1</span>].startswith(<span class="st">"*** END"</span>):</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    lines <span class="op">=</span> lines[:<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>lines <span class="op">=</span> lines[:<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>raw_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(lines)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(raw_text[:<span class="dv">500</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+LES CHANTS DE MALDOROR
+
+par
+
+LE COMTE DE LAUTRÉAMONT
+
+
+
+
+CHANTS I, II, III, IV, V, VI
+
+
+
+
+[Illustration: ...; il trainait, à travers les dalles de la chambre, sa
+peau retourné]
+
+[Illustration: manuscrit d'une lettre.]
+
+
+
+_A mon ami_ ALBERT LACROIX.
+
+
+L'édition actuelle des _Chants de Maldoror_ est la réimpression, revue
+et corrigée d'après le manuscrit original, d'un ouvrage qui n'a jamais
+paru en librairie. Dans le courant de 1869, M. le comte de Lautréamont
+venait de délivrer les derniers bon</code></pre>
+</div>
+</div>
+</section>
+<section id="cleaning-steps" class="level2">
+<h2 class="anchored" data-anchor-id="cleaning-steps">2. Cleaning Steps</h2>
+<p>I first read the text file into Python using “open()” and “read()”. I split the text into lines and used while loops to remove the Project Gutenberg header and footer. I then searched the remaining lines for the six chant headings and recorded their indices. Using these indices, I extracted the text belonging to each chant. I converted the text to lowercase and used “re.split(r”[]+“, …)” to separate it into word tokens. I removed empty strings with a list comprehension and stored each word alongside its chant label in a list of dictionaries. One cleaning decision that I made was to convert all words to lowercase, which makes differently capitalize dforms count as the same word, but also removes distinctions betwene proper names and words that appear at the beginning of a sentence. Fortunatley, proper names are not prominent in the raw text, and this does not affect signifcantly what I will be tracking throughout the project. A more significant step that affects my project is the splitting method, which separates contractions and hyphenated words at punctuation which can affect french words like “l’homme” and “l’adore”, but those words are still easily identifiable and does not effect standalone French pronouns like “Il”, “Tu”, and “Je”.</p>
+<div id="e1fd3896" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>headings <span class="op">=</span> [</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CHANT PREMIER"</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CHANT DEUXIÈME"</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CHANT TROISIÈME"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CHANT QUATRIÈME"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CHANT CINQUIÈME"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CHANT SIXIÈME"</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>text_lines <span class="op">=</span> raw_text.splitlines()</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> line <span class="kw">in</span> text_lines:</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"CHANT"</span> <span class="kw">in</span> line.upper():</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="bu">repr</span>(line))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>heading_indices <span class="op">=</span> []</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> heading <span class="kw">in</span> headings:</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    found <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(text_lines)):</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> text_lines[i].strip() <span class="op">==</span> heading:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>            heading_indices.append(i)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            found <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> found:</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Heading not found:"</span>, heading)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Heading indices:"</span>, heading_indices)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(heading_indices) <span class="op">==</span> <span class="bu">len</span>(headings):</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(headings)):</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>        start <span class="op">=</span> heading_indices[i] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&lt;</span> <span class="bu">len</span>(headings) <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>            end <span class="op">=</span> heading_indices[i <span class="op">+</span> <span class="dv">1</span>]</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>            end <span class="op">=</span> <span class="bu">len</span>(text_lines)</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>        chant_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(text_lines[start:end])</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>        words <span class="op">=</span> re.split(<span class="vs">r"</span><span class="pp">[</span><span class="dv">\W</span><span class="pp">]</span><span class="op">+</span><span class="vs">"</span>, chant_text.lower())</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>        words <span class="op">=</span> [w <span class="cf">for</span> w <span class="kw">in</span> words <span class="cf">if</span> w <span class="op">!=</span> <span class="st">""</span>]</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> w <span class="kw">in</span> words:</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>            rows.append({<span class="st">"word"</span>: w, <span class="st">"chant"</span>: headings[i]})</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"First 20 rows:"</span>)</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(rows[:<span class="dv">20</span>])</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Last 20 rows:"</span>)</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(rows[<span class="op">-</span><span class="dv">20</span>:])</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Total word tokens:"</span>, <span class="bu">len</span>(rows))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'LES CHANTS DE MALDOROR'
+'CHANTS I, II, III, IV, V, VI'
+"L'édition actuelle des _Chants de Maldoror_ est la réimpression, revue"
+'Mais en 1870, la guerre éclatait. On ne pensa plus aux _Chants de'
+'La Critique appréciera, comme il convient, les _Chants de Maldoror_,'
+"recueillis, que l'auteur des _Chants de Maldoror_ n'est pas mort fou. Le"
+'témérité présumer son complet achèvement en 1867; les _Chants de'
+"avis sur l'auteur des _Chants de Maldoror_."
+"certains jugements qui ne manqueront pas d'être portés sur les _Chants"
+'[1] La couverture et le titre sont ainsi composés: _Les Chants--de'
+'--Maldoror--par--le comte de Lautréamont--(Chants I, II, III, IV, V, VI)'
+'LES CHANTS DE MALDOROR'
+'CHANT PREMIER'
+"qu'il était né méchant: fatalité extraordinaire! Il cacha son caractère"
+'à les remettre dans leur première position. Celui qui chante ne prétend'
+'loue de ce que les pensées hautaines et méchantes de son héros soient'
+"J'ai pris un canif dont la lame avait un tranchant acéré, et me suis"
+'de ses misères. Ensuite, on boit le sang en léchant les blessures; et,'
+'gémit à travers les feuilles ses notes langoureuses, et le hibou chante'
+"la peste à l'hôpital, soit comme une jeune fille qui chante un air sublime,"
+'atteints de la rage, cherchant un vaste étang pour apaiser leur soif. Leurs'
+'serais pas si méchant. Vous, qui me regardez, éloignez-vous de moi, car'
+'--Oh! que ton existence sera suave! Je te donnerai une bague enchantée;'
+"voix! Je préfère l'entendre parler, que chanter d'autres. Cependant,"
+'phénomènes, ce premier chant finit ici. Ne soyez pas sévère pour celui'
+'remettre au travail, pour faire paraître un deuxième chant, dans un laps'
+'FIN DU PREMIER CHANT'
+'CHANT DEUXIÈME'
+'Où est-il passé ce premier chant de Maldoror, depuis que sa bouche,'
+'chant ... On ne le sait pas au juste. Ce ne sont pas les arbres, ni les'
+'il te regarde encore. Il est difficile de supposer que, touchant les'
+'légitime persuasion que tu deviennes aussi méchant que lui, et que tu'
+'Je saisis la plume qui va construire le deuxième chant ... instrument'
+"méchants, puisqu'il y en a eu un, enfin, qui a su attirer, de force,"
+"qu'il chante un hymne d'amour, entre les bras d'un être humain d'une"
+'torture. La peau disparaît par un étrange enchantement. Les poux sont'
+"mère que si elle délaisse la couche de l'homme, marchant à travers des"
+'accrochant mes griffes aux escarres de ta nuque teigneuse, et je te'
+'de la misérable pagode, un caillou plat, à tranchant effilé. Il le lance'
+'bleuâtre, cherchant la lumière dans les replis de satin du crépuscule,'
+'son influence enchanteresse, et me regardait avec compassion; cependant,'
+"me suis trompé jusqu'ici; en voilà un qui est plus méchant.» Alors, d'un"
+"ténébreux qui prennent leur essor dans l'éther lugubre, en cachant, avec"
+'travers les mines explosibles de ce chant impie! Le crocodile ne'
+'FIN DU DEUXIÈME CHANT'
+'CHANT TROISIÈME'
+"plume, pendant le deuxième chant, a tirés d'un cerveau, brillant d'une"
+"miroitements de l'or, les voluptés amères du désenchantement, les rides"
+"c'était la ville des oiseaux, que, là, ils chantaient depuis l'aurore"
+'qui ne chante pas si bien que le rossignol; tirant sournoisement la'
+'ses adieux aux enchantements de la vie, abandonnant pour toujours'
+'de son bouledogue, livré à de bas penchants, et qui élevait sa tête'
+'main divine, et ses agonies se terminèrent pendant le chant des nonnes'
+'cette terre, par des chants admirables de poésie, de courage, contre les'
+'le bruissement des feuilles, à travers les clairières, chantera à ses'
+'FIN DU TROISIÈME CHANT'
+'CHANT QUATRIÈME'
+"chant. Quand le pied glisse sur une grenouille, l'on sent une sensation"
+'de ma demeure. Il y aura, dans mes chants, une preuve imposante de'
+'puissance, pour mépriser ainsi les opinions reçues. Il chante pour lui'
+'bien-aimé.» Comme quand deux chantres, dans une cathédrale, entonnent'
+"délicate qui couvre mes côtes: j'y suis habitué. Une vipère méchante"
+'comme poussé par une force supérieure. Je ne suis pas si méchant que'
+'En effet, je ne suis pas si méchant que toi! Tu viens de jeter un regard'
+'FIN DU QUATRIÈME CHANT'
+'CHANT CINQUIÈME'
+'même, ne fais pas attention à la manière bizarre dont je chante chacune'
+"certain point, ta sympathie est acquise à mes chants? Or, qui t'empêche"
+'penchant marqué pour le caramel (admirable farce de la nature), personne'
+'empoisonnée par ta respiration, et, arrachant de tes entrailles une'
+"funestes qu'entraîne, après lui, l'inexplicable talisman enchanteur que"
+'binarité de vos rotules vers la terre et entonnez un chant'
+"l'inamovible situation d'un manque de repentir, touchant l'ignorance"
+'temps si profond. Une arme tranchante, comme le serait un stylet des plus'
+'FIN DU CINQUIÈME CHANT'
+'CHANT SIXIÈME'
+"par ce sixième chant, la série des poëmes instructifs qu'il me tarde de"
+"l'aurore et du chant du rossignol.» Maldoror, caché derrière la porte,"
+"d'eau, un individu, débouchant de la rue de Rivoli, est venu s'asseoir."
+'cachant la moitié de la figure, et les jambes battant le gravier dans'
+"fois, pour écouter les chants de l'oiseau, admirer sa grâce fugitive et"
+"canari ne chante plus.» L'auditeur approuve dans son intérieur ce nouvel"
+"descente. Eh bien, la marée est venue; elle l'a bercé de ses chants, et"
+"Vrai, c'était touchant de voir ces deux êtres, séparés par l'âge,"
+'ces quelques mots touchants sur le marbre de ma tombe, et mes mânes'
+'FIN DU SIXIÈME CHANT.'
+"End of Project Gutenberg's Les Chants de Maldoror, by Comte de Lautreamont"
+Heading indices: [303, 1514, 3223, 4065, 5051, 6071]
+First 20 rows:
+[{'word': 'plût', 'chant': 'CHANT PREMIER'}, {'word': 'au', 'chant': 'CHANT PREMIER'}, {'word': 'ciel', 'chant': 'CHANT PREMIER'}, {'word': 'que', 'chant': 'CHANT PREMIER'}, {'word': 'le', 'chant': 'CHANT PREMIER'}, {'word': 'lecteur', 'chant': 'CHANT PREMIER'}, {'word': 'enhardi', 'chant': 'CHANT PREMIER'}, {'word': 'et', 'chant': 'CHANT PREMIER'}, {'word': 'devenu', 'chant': 'CHANT PREMIER'}, {'word': 'momentanément', 'chant': 'CHANT PREMIER'}, {'word': 'féroce', 'chant': 'CHANT PREMIER'}, {'word': 'comme', 'chant': 'CHANT PREMIER'}, {'word': 'ce', 'chant': 'CHANT PREMIER'}, {'word': 'qu', 'chant': 'CHANT PREMIER'}, {'word': 'il', 'chant': 'CHANT PREMIER'}, {'word': 'lit', 'chant': 'CHANT PREMIER'}, {'word': 'trouve', 'chant': 'CHANT PREMIER'}, {'word': 'sans', 'chant': 'CHANT PREMIER'}, {'word': 'se', 'chant': 'CHANT PREMIER'}, {'word': 'désorienter', 'chant': 'CHANT PREMIER'}]
+
+Last 20 rows:
+[{'word': 'pas', 'chant': 'CHANT SIXIÈME'}, {'word': 'me', 'chant': 'CHANT SIXIÈME'}, {'word': 'croire', 'chant': 'CHANT SIXIÈME'}, {'word': 'fin', 'chant': 'CHANT SIXIÈME'}, {'word': 'du', 'chant': 'CHANT SIXIÈME'}, {'word': 'sixième', 'chant': 'CHANT SIXIÈME'}, {'word': 'chant', 'chant': 'CHANT SIXIÈME'}, {'word': 'end', 'chant': 'CHANT SIXIÈME'}, {'word': 'of', 'chant': 'CHANT SIXIÈME'}, {'word': 'project', 'chant': 'CHANT SIXIÈME'}, {'word': 'gutenberg', 'chant': 'CHANT SIXIÈME'}, {'word': 's', 'chant': 'CHANT SIXIÈME'}, {'word': 'les', 'chant': 'CHANT SIXIÈME'}, {'word': 'chants', 'chant': 'CHANT SIXIÈME'}, {'word': 'de', 'chant': 'CHANT SIXIÈME'}, {'word': 'maldoror', 'chant': 'CHANT SIXIÈME'}, {'word': 'by', 'chant': 'CHANT SIXIÈME'}, {'word': 'comte', 'chant': 'CHANT SIXIÈME'}, {'word': 'de', 'chant': 'CHANT SIXIÈME'}, {'word': 'lautreamont', 'chant': 'CHANT SIXIÈME'}]
+
+Total word tokens: 80776</code></pre>
+</div>
+</div>
+</section>
+<section id="the-clean-table" class="level2">
+<h2 class="anchored" data-anchor-id="the-clean-table">3. The Clean Table</h2>
+<p>Each row represents one word token in the order it appears in the text. The word column contains the cleaned, lowercase word, and the chant column identifies the chant from which it came. The table contains 80,776 rows. I converted the list of dictionaries into a pandas DataFrame and inspected its lenth, first rows, last rows, and column names before saving it as a CSV file.</p>
+<div id="9ae01c00" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(rows)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of rows:"</span>, <span class="bu">len</span>(df))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">First rows:"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.head())</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Last rows:"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.tail())</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Column names:"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.columns.tolist())</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Number of words in each chant:"</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df[<span class="st">"chant"</span>].value_counts().sort_index())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of rows: 80776
+
+First rows:
+   word          chant
+0  plût  CHANT PREMIER
+1    au  CHANT PREMIER
+2  ciel  CHANT PREMIER
+3   que  CHANT PREMIER
+4    le  CHANT PREMIER
+
+Last rows:
+              word          chant
+80771     maldoror  CHANT SIXIÈME
+80772           by  CHANT SIXIÈME
+80773        comte  CHANT SIXIÈME
+80774           de  CHANT SIXIÈME
+80775  lautreamont  CHANT SIXIÈME
+
+Column names:
+['word', 'chant']
+
+Number of words in each chant:
+chant
+CHANT CINQUIÈME    12226
+CHANT DEUXIÈME     20609
+CHANT PREMIER      12845
+CHANT QUATRIÈME    11822
+CHANT SIXIÈME      13014
+CHANT TROISIÈME    10260
+Name: count, dtype: int64</code></pre>
+</div>
+</div>
+</section>
+<section id="still-messy" class="level2">
+<h2 class="anchored" data-anchor-id="still-messy">4. Still Messy</h2>
+<p>I will have to deal with the separation between contractions in french text and the loss of distinction between capitialization of proper nouns and the captitialization as well as punctuaiton which distinguishes sentences. Neither of these things affects the purpose of my analysis too significantly but without the contraction distinctions it can make analyzing the influence of pronouns in different tenses in relaiton to the context of passages I would be analyzing more difficult, but it still does not undermine the primary goal of my analysis.</p>
+<div id="b2759729" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df.to_csv(<span class="st">"project2_bentley_william.csv"</span>, index<span class="op">=</span><span class="va">False</span>, encoding<span class="op">=</span><span class="st">"utf-8-sig"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>check <span class="op">=</span> pd.read_csv(<span class="st">"project2_bentley_william.csv"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Original number of rows:"</span>, <span class="bu">len</span>(df))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Reloaded number of rows:"</span>, <span class="bu">len</span>(check))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Original columns:"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.columns.tolist())</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Reloaded columns:"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(check.columns.tolist())</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">First rows of the reloaded CSV:"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(check.head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Original number of rows: 80776
+Reloaded number of rows: 80776
+
+Original columns:
+['word', 'chant']
+
+Reloaded columns:
+['word', 'chant']
+
+First rows of the reloaded CSV:
+   word          chant
+0  plût  CHANT PREMIER
+1    au  CHANT PREMIER
+2  ciel  CHANT PREMIER
+3   que  CHANT PREMIER
+4    le  CHANT PREMIER</code></pre>
+</div>
+</div>
+<ul>
+<li>AI use disclosure: I used ChatGPT to review and correct my written code due to an error I kept recieving about identifing “CHANT PREMIERE” and it identified an issue with the formatting of the raw text file itself which necessitated the inclusion of the command “for line in text_lines: if”CHANT” in line.upper(): print(repr(line))“. In addition it offered slight code formatting and labeling corrections, such as inconistencies I had made in labeling such as”text_lines” vs “lines”. I then corrected my original code and replaced it with the revised code while retaining the parts of the code I had correct originally.</li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
