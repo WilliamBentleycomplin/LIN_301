@@ -1,0 +1,124 @@
+---
+title: HW 6 Functions - Hawaiian Syllables
+author: William Bentley
+format: html
+---
+## Part 1: Write Your Functions
+
+* I wrote write four functions to identify Hawaiian vowels, construct consonant-vowel patterns, separate words into syllables, and also count the number of syllables in each word. I then used these functions to analyze a dataset of Hawaiian words.
+
+```{python}
+import sys
+import pandas as pd
+sys.path.append("../../data")
+from lin301 import *
+
+df = pd.read_csv("hawaiian_words.csv", encoding="utf-8")
+
+df.head()
+```
+
+* First, I tested each of the functions on several different Hawaiian words to make sure that it returned the expected result.
+
+```{python}
+
+print(is_vowel("a"))
+print(is_vowel("ū"))
+print(is_vowel("k"))
+print(is_vowel("ʻ"))
+
+print(cv_pattern("aloha"))
+print(cv_pattern("ʻohana"))
+print(cv_pattern("nēnē"))
+
+print(syllabify("aloha"))
+print(syllabify("ʻohana"))
+print(syllabify("nēnē"))
+print(syllabify("kīlauea"))
+
+print(count_syllables("aloha"))
+print(count_syllables("ʻohana"))
+print(count_syllables("kīlauea"))
+```
+
+## Part 2: Explore the Word List
+
+* I used the four functions that I defined in lin301.py to examine the 45 Hawaiian words in the datatset. I added three columns to the original DataFrame, which were "cv", "syllables", and "n_syllables". "cv" records the consonant vowel pattern, "syllables" separates each word into syllables using periods, and "n_syllables" records the total number syllables.
+
+```{python}
+df["cv"] = [cv_pattern(word) for word in df["word"]]
+df["syllables"] = [".".join(syllabify(word)) for word in df["word"]]
+df["n_syllables"] = [count_syllables(word) for word in df["word"]]
+df.head()
+```
+
+* I calculated the mean (using ".mean") of the "n_syllables" column in order to determine the average number of syllables per word. I also identified the words with the most syllables by sorting the DatatFrame by syllable count in a descending order. When I ran this, I 
+
+```{python}
+print("average number of syllables:")
+print(df["n_syllables"].mean())
+
+print("words with the most syllables:")
+df.sort_values("n_syllables", ascending=False).head()
+```
+
+
+* The average number of syllables per word is 3.11. The word with the most syllables is "humuhumunukunukāpua'a", with 12 syllables.
+
+
+* I grouped words according to their number of syllables and counted how many words did belong to each group.
+
+```{python}
+df.groupby("n_syllables").size()
+```
+
+
+* The results show how frequently each syllable count occurs in the dataset. The most common word length is 2 syllables, with 17 words, and the least common word length is 12 syllables, for just one word.There are 17 words with 2 syllables, 16 words with 3 syllables, 9 words with 4 syllables, 2 words with 5 syllables, and 1 word with 12 syllables.
+
+* I searched for words containing two consonants, then I searched for words ending in a single consonant.
+```{python}
+df[df["cv"].str.contains("CC")]
+```
+```{python}
+df[df["cv"].str.endswith("C")]
+```
+
+* Both searches came up with an empty DataFrame, meaning that no Hawaiian words end in a consonant or contain two consonants, which supports what you outlined earlier. 
+
+* I created a second DataFrame where each row repreesents an individual syllable and the word from where it came from. I used a nested "for" loop to go through each word and then each syllable within that word, and then I stored the results in a list of dictionaries before converting that list into a DataFrame. I used "groupby", ".size()", and ".sort_values" to group the syllables and count their occurences to find the ten most common syllables in the dataset.
+
+```{python}
+syllable_rows = []
+
+for word in df["word"]:
+    for syllable in syllabify(word):
+        syllable_rows.append({"syllable": syllable, "word": word})
+
+syllable_df = pd.DataFrame(syllable_rows)
+syllable_df.head(10)
+```
+
+```{python}
+syllable_df.groupby("syllable").size().sort_values(ascending=False).head(10)
+```
+
+* The ten most common syllables in the dataset are "i", "a", "ha", "ka", "na", "le", "hu", "u", "ma", and "'i". "i" was the most frequently occuring syllable, appearing 9 times.
+
+* I applied the same functions to the words "banana", "splash", and "strengths" in order to whether the rules of Hawaiian syllables can be applied to a language with different phonological rules.
+
+```{python}
+english_words = ["banana", "splash", "strengths"]
+for word in english_words:
+    print(word)
+    print(cv_pattern(word))
+    print(syllabify(word))
+```
+
+
+# Paragraph
+
+* I found that the results show that the Hawiian method of syllabification works correctly for the word "banana", but not for either "splash" or "strengths". Banana follows a consonant-vowel pattern that makes it easier to separate into syllables. "Splash" and "strengths" contain conanants that are bined together according to their number of syllables, so the Hawaiian syllabification method in unable to account for them. Multiple consonants occur at the beginning or end of a syllable in "splash" and "strengths", which doesn't correspond to English pronounciation. Because Hawaiian syllables consist or either a single vowel or a consonant follwed by a vowel, this is not a problem for Hawaiian using these rules. This shows that English permits mre complex syllabic structures that Hawaiian does.
+
+# AI Disclosure
+
+* I used AI to autofill code that I was in the middle entering into this quartro document when it already matched what was in the middle of entering, such as the nested "for" loops or methods like ".append" or ".size()". I did not use it when it attempted to aufill Hawaiian words, such as "nēnē". 
