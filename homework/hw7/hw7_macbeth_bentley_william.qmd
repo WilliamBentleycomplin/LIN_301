@@ -1,0 +1,140 @@
+---
+title: HW7 Semantic Analysis - Macbeth in Three Languages
+author: William Bentley
+format: html
+---
+
+## Code and Explanations
+
+* I imported the libraries and functions needed for the analysis, including pandas, spacy, and unicodedata. I also loaded the English, Finnish, and Greek language models from spacy. The lin301 file has the course functions I can use to process the texts, whle I can use Pandas to analyze the data, and spacy to identify the linguistic features of the words in the texts.
+
+```{python}
+import sys
+sys.path.append("../../data")
+from lin301 import *
+
+import pandas as pd
+import spacy
+import unicodedata
+
+nlp_en = spacy.load("en_core_web_sm")
+nlp_fi = spacy.load("fi_core_news_sm")
+nlp_el = spacy.load("el_core_news_sm")
+```
+
+* I processed the three versions of Macbeth into three separate DataFrames using the "book_spacy_df" function. Each DataFrame contains the words, their lowercase form, lemma, part of speech, and the sentence and act numbers. I used the "chapter_word" argument to identifiy the act of each version and I supplied a different heading pattern for each text.
+
+```{python}
+en = book_to_spacy_df("macbeth_en.txt", "english", nlp_en, "ACT")
+fi = book_to_spacy_df("macbeth_fi.txt", "finnish", nlp_fi, r"(?:ENSIMMÄINEN|TOINEN|KOLMAS|NELJÄS|VIIDES) NÄYTÖS")
+el = book_to_spacy_df("macbeth_el.txt", "greek", nlp_el, "ΠΡΑΞΙΣ")
+```
+
+* I calculated the number of acts and words in each DataFrame using the "nunique" function to count the act numbers in each "chapter" column, while "len()" returns the total number of rows in the DataFrame. The length of the DataFrame gives the total word count because each row represents one word. All three texts have five acts. The English version has 17,668 words, the Finnish version has 12,113 words, and the Greek version has 18,123 words. The Greek version has the most words, while Finnish has the fewest and English is in between. The differences in word counts may be due to the different languages and their structures, as well as the translation choices made by the translators. 
+
+```{python}
+act_summary = pd.DataFrame([{"language": "english", "acts": en["chapter"].nunique(), "words": len(en)}, {"language": "finnish", "acts": fi["chapter"].nunique(), "words": len(fi)}, {"language": "greek", "acts": el["chapter"].nunique(), "words": len(el)}])
+act_summary
+```
+```{python}
+print("english acts:", en["chapter"].nunique())
+print("finnish acts:", fi["chapter"].nunique())
+print("greek acts:", el["chapter"].nunique())
+```
+
+Output: 
+english acts: 5
+finnish acts: 5
+greek acts: 5
+
+* The frst investigation I chose was parts of speech. I wanted to examine the distributon of nouns, verbs, and adjectives in each version of Macbeth. The three grammatical categories are counted separatley for each language and compared using their frequency per 1,000 words. I dvided the counts by the total number of words and multipled them by 1,000 to make the results comparable. The frequency per 1,000 words is stored in a list of dictionaries and converted into a DataFrame.I used a nested for loop to go through each DatatFrame and part of speech. "(df["pos"] == pos).sum()" counts the number of words im each part of speech category, which produces boolean values that can be summed and give the number of matches. Finnish has the highest frequency of nouns, at 316.5 per 1,000 words, compated to 194.4 in English and 205.0 in Greek. Finnish also has the the highest frequency of verbs, at 169.7 per 1,000 words. English has the highest frequency of adjectives, at 65.3 per 1,000 words, while Finnish has the lowest, 53.7, while Greek falls between the two at 58.0 per 1,000 words. I believe that the differences in the frequencies of parts of speech reflects the structures of the language and the choices of the translators. Finnish uses case endings, which can cause differences in the expression of ideas compared to English and Greek. The translators may also have different preferences for their style of sentence construction, which would affect the vocabulary. 
+
+
+```{python}
+pos_rows = []
+for language, df in [("english", en), ("finnish", fi), ("greek", el)]:
+    for pos in ["NOUN", "VERB", "ADJ"]:
+        count = (df["pos"] == pos).sum()
+        rate = round(count/len(df) * 1000, 1)
+
+        pos_rows.append({"language": language, "part of speech": pos, "count": count, "per 1,000 words": rate})
+
+pos_table = pd.DataFrame(pos_rows)
+pos_table
+```
+
+Output:
+
+    language	part of speech	count	per 1,000 words
+0	english	       NOUN	         3435	194.4
+1	english	       VERB	         2203	124.7
+2	english	        ADJ	         1154	65.3
+3	finnish	       NOUN	         3834	316.5
+4	finnish	       VERB	         2055	169.7
+5	finnish	        ADJ	          651	53.7
+6	greek	       NOUN	         3716	205.0
+7	greek	       VERB	         1985	109.5
+8	greek	        ADJ	1051	58.0
+
+* The second investigation I chose was scripts to analyze the writing systems of the texts. English and Finnish use Latin writing systems, while Greek uses the Greek writing system. I used unicodedata to identify the name of the first character of each word, and then extract the script from this name compared with the writing system from the language. I used "script_of()" to take a character as its input and then used "unicodedata.name()" in order to retrieve its unicode name. I used ".split()[0]" to extract the first part of that name which will identify the script. Then each word in each language's DataFrame was looped through and eachh word has its first character examined to identify the script and then the script is compared with its expected script. I then added the results to two lists. The first list stores the language, word, and the identified script, and the second stores words whose scripts do not match the expected script. The lists were then converted into a DataFrame. The results show that all the English and Finnish words use in the corpus use the Latin script, while almost all of the Greek words use Greek script. The English text contains 17,668 Latin script words, the Finnish text contains 12,113 Latin script words, and the Greek text contains 18,122 Greek script words and one Latin script word. The unexpected Greek word is "eγώ", which combines a Latin character "e" with the Greek characters "γώ". I think this is a transciption or typographical error. The results show the three texts are mostly consistent in their use of their writing systems, but since my code only identifies the script of the words first character, I can't be sure that all of the characters in each word are consistent with the expected script.
+
+```{python}
+def script_of(char):
+    return unicodedata.name(char, "UNKNOWN").split()[0]
+
+
+script_rows =[]
+unexpected_rows = []
+
+for language, df, expected in [("english", en, "LATIN"), ("finnish", fi, "LATIN"),("greek", el, "GREEK")]:
+
+    for word in df["word"]:
+        script = script_of(word[0])
+        script_rows.append({"language": language, "word": word, "script": script})
+        if script != expected:
+            unexpected_rows.append({"language": language, "word": word, "script": script})
+
+script_words = pd.DataFrame(script_rows)
+unexpected_words = pd.DataFrame(unexpected_rows)
+```
+
+```{python}
+script_counts = script_words.groupby(["language", "script"]).size()
+
+script_counts
+```
+
+```{python}
+print("english unexpected words:")
+print(unexpected_words[unexpected_words["language"] == "english"]["word"].unique())
+print("finnish unexpected words:")
+print(unexpected_words[unexpected_words["language"] == "finnish"]["word"].unique())
+print("greek unexpected words:")
+print(unexpected_words[unexpected_words["language"] == "greek"]["word"].unique())
+```
+
+Output:
+language  script
+english   LATIN     17668
+finnish   LATIN     12113
+greek     GREEK     18122
+          LATIN         1
+dtype: int64
+
+english unexpected words:
+[]
+finnish unexpected words:
+[]
+greek unexpected words:
+['eγώ']
+
+## Reflection
+* I found that as I compared the three versions of Macbeth, that translations of the same piece of literature can have different linguistic characteristics, even when its source material for the translation is the same. The analysis I did for parts of speech shows differences in the frequencies of nouns, verbs, and adjectives, while the script analysis shows that each text mostly uses its expected writing system. I beleive that the differences most likely come from the structures of the different languages and the decisions of the translators. The fact that Shakespeare uses specific rhythms for the verse and dialouge would probabaly mean they would have to be altered to be relevant to each language. I think that is shownin the Finnish version, with its higher freuqncies of nouns and verbs compared to the English and Greek. The limitations to my analysis I think include that fact that the spacy models do not classify every word correctly, and these models do not account for the fact that the writing is poetic and so it functions differently. Also, the results would reflect the languages and the quality of the translations, not just the language itself. 
+
+
+## AI Disclosure
+
+I has an issue loading my text files, and I used ChatGPt to troubleshoot and discover I had actually not downloaded the text files themselves, but rather links to the project gutenberg webpages where I could download them. The only other AI I used was to fill in code that I was already in the process of filling out, such as the for loops, but I would ignore it when it tried to supply me with commands like ".pivot" and ".map". 
+
+Note: I decided to summarize my code and explain results before the code blocks rather than beside each single one, so I just wanted ot let you know that all of the information is there, its just in a single block of text rather than beside each one to accomodate for the outputs that I posted as per the instructions.
+
